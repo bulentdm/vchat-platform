@@ -7,6 +7,11 @@ const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = process.env.JWTSECRET || process.env.SECRET_KEY || 'vchat_fallback_secret_change_me';
+  console.warn('JWT_SECRET tanimli degildi, fallback deger kullanildi. Railway Variables icinde JWT_SECRET tanimlayin.');
+}
+
 const sequelize = require('./config/db');
 const { Op } = require('sequelize');
 const User = require('./models/User');
