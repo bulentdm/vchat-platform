@@ -29,9 +29,6 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
 const allowedOrigins = [
   'http://localhost',
   'http://localhost:3001',
