@@ -1,0 +1,55 @@
+services:
+  # 🗄️ Veritabanı
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: vchat_db
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      timeout: 20s       # Sağlık kontrolü için daha uzun süre
+      retries: 10        # Daha fazla deneme hakkı
+      start_period: 30s  # MySQL'in başlaması için ek süre
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # 🚀 Backend API
+  backend:
+    build: ./server
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - JWT_SECRET=your_super_secret_key
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=password
+      - DB_NAME=vchat_db
+      - AGORA_APP_ID=${AGORA_APP_ID}
+      - AGORA_APP_CERTIFICATE=${AGORA_APP_CERTIFICATE}
+      # 📧 Mail (Resend: SMTP_HOST=smtp.resend.com SMTP_PORT=465 SMTP_USER=resend SMTP_PASS=re_xxx)
+      # 📧 Mail (Gmail: SMTP_HOST=smtp.gmail.com  SMTP_PORT=465 SMTP_USER=sen@gmail.com SMTP_PASS=app_sifresi)
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - MAIL_FROM=${MAIL_FROM:-vChat <noreply@vchat.com>}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 💻 Frontend Web
+  frontend:
+    build: ./client
+    restart: always
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

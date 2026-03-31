@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Environment secrets - NEVER commit these
+.env
+.env.local
+.env.production
+
+# Build outputs
+client/dist/
+client/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+db_data/
+
+# Logs
+*.log
+logs/
