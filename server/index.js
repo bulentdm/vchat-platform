@@ -320,13 +320,18 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5001; // Port 5001 olarak güncellendi
 
-// Veritabanını senkronize et ve sunucuyu başlat
-sequelize.sync({ alter: true }).then(() => {
-  console.log('✅ Veritabanı başarıyla senkronize edildi.');
-  server.listen(PORT, () => {
-    console.log(`🚀 Sunucu http://localhost:${PORT} adresinde çalışıyor.`);
-    // Not: Client tarafında socket bağlantısı için 'http://localhost:5001' kullanılmalıdır.
-  });
-}).catch((err) => {
-  console.error('❌ Veritabanı hatası:', err);
+// Sağlık kontrolü için HTTP sunucusunu hemen başlat.
+server.listen(PORT, () => {
+  console.log(`🚀 Sunucu http://localhost:${PORT} adresinde çalışıyor.`);
 });
+
+// Veritabanını arka planda başlat; hata olsa da süreç ayakta kalsın.
+(async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync({ alter: false });
+    console.log('✅ Veritabanı bağlantısı ve senkronizasyon tamam.');
+  } catch (err) {
+    console.error('❌ Veritabanı başlatma hatası:', err?.message || err);
+  }
+})();
